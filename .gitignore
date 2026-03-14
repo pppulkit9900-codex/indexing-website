@@ -1,0 +1,8 @@
+# Dependencies
+node_modules/
+
+# Database file (contains real data!)
+data.db
+
+# Environment variables (contains secrets!)
+.env

@@ -245,7 +245,7 @@
       // New Async initialization
 async function loadLinks() {
     try {
-        const response = await fetch('http://192.168.31.203:3000/api/all-links');
+        const response = await fetch('/api/all-links');
         const sqlData = await response.json();
         
         // Re-initialize the search engine with SQL data
@@ -423,7 +423,7 @@ loadLinks();
                 desc: document.getElementById('new-desc').value
             };
 
-            const res = await fetch('http://192.168.31.203:3000/api/add-link', {
+            const res = await fetch('/api/add-link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -440,7 +440,7 @@ loadLinks();
             const password = document.getElementById('auth-pass').value;
             const endpoint = isLoginMode ? '/api/login' : '/api/signup';
 
-            const res = await fetch(`http://192.168.31.203:3000${endpoint}`, {
+            const res = await fetch(`${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -461,7 +461,7 @@ loadLinks();
         
         // 🕵️ 1. Check if we're Spark69 on load
         async function checkAdmin() {
-            const res = await fetch('http://192.168.31.203:3000/api/me');
+            const res = await fetch('/api/me');
             const data = await res.json();
             if (data.loggedIn && data.user.name === 'Spark69') {
                 document.getElementById('admin-gear').classList.remove('hidden');
@@ -473,7 +473,7 @@ loadLinks();
         async function deleteLink(id) {
             if (!confirm("Fr fr? Delete this? 🗑️")) return;
             
-            await fetch('http://192.168.31.203:3000/api/delete-link', {
+            await fetch('/api/delete-link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id })
@@ -513,7 +513,7 @@ loadLinks();
             const url = document.getElementById('adm-url').value;
             const desc = document.getElementById('adm-desc').value;
 
-            const res = await fetch('http://192.168.31.203:3000/api/add-link', {
+            const res = await fetch('/api/all-links', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ category, name, url, desc })

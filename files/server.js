@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const Database = require('better-sqlite3');
 const session = require('express-session');
@@ -18,7 +20,7 @@ app.use(express.static(__dirname));
 // 🍪 1. High-Security Cookie Setup
 app.use(session({
     store: new SqliteStore({ client: db }),
-    secret: 'change-this-to-a-random-unhinged-string', // Your "Master Key"
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -35,7 +37,7 @@ db.prepare('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT 
 const isAdmin = (req, res, next) => {
     if (req.session.userId) {
         const user = db.prepare('SELECT name FROM users WHERE id = ?').get(req.session.userId);
-        if (user && user.name === 'Spark69') {
+        if (user && user.name === process.env.ADMIN_USERNAME) {
             return next(); // You're good, King.
         }
     }
@@ -122,7 +124,7 @@ app.post('/api/update-link', isAdmin, (req, res) => {
     res.json({ success: true });
 });
 
-app.listen(3000, '0.0.0.0', () => {
-    console.log(" your Server is LIVE! On your phone, go to:");
-    console.log("http://192.168.31.203:3000/index.html");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
