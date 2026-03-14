@@ -1,0 +1,202 @@
+[
+  {
+    "id": 1,
+    "name": "Crunchyroll",
+    "url": "https://www.crunchyroll.com",
+    "category": "anime",
+    "description": "Stream thousands of anime episodes with subtitles and dubs",
+    "tags": ["anime", "streaming", "manga", "legal", "subscription"]
+  },
+  {
+    "id": 2,
+    "name": "Netflix",
+    "url": "https://www.netflix.com",
+    "category": "anime",
+    "description": "Popular streaming service with growing anime collection",
+    "tags": ["anime", "streaming", "movies", "tv", "subscription"]
+  },
+  {
+    "id": 3,
+    "name": "HiAnime",
+    "url": "https://hianime.to",
+    "category": "anime",
+    "description": "Free anime streaming with multiple quality options",
+    "tags": ["anime", "free", "streaming", "subbed", "dubbed"]
+  },
+  {
+    "id": 4,
+    "name": "Funimation",
+    "url": "https://www.funimation.com",
+    "category": "anime",
+    "description": "English dubbed anime streaming service",
+    "tags": ["anime", "streaming", "dubbed", "subscription"]
+  },
+  {
+    "id": 5,
+    "name": "Open Library",
+    "url": "https://openlibrary.org",
+    "category": "books",
+    "description": "Free digital library with millions of books to borrow",
+    "tags": ["books", "library", "free", "ebooks", "borrowing"]
+  },
+  {
+    "id": 6,
+    "name": "Z-Library",
+    "url": "https://z-lib.io",
+    "category": "books",
+    "description": "Largest free electronic library with books and articles",
+    "tags": ["books", "library", "ebooks", "academic", "free", "pdf"]
+  },
+  {
+    "id": 7,
+    "name": "Project Gutenberg",
+    "url": "https://www.gutenberg.org",
+    "category": "books",
+    "description": "Over 70,000 free classic books in various formats",
+    "tags": ["books", "free", "classics", "public domain", "ebooks"]
+  },
+  {
+    "id": 8,
+    "name": "Libgen",
+    "url": "https://libgen.is",
+    "category": "books",
+    "description": "Scientific articles and general-interest books",
+    "tags": ["books", "academic", "research", "free", "pdf"]
+  },
+  {
+    "id": 9,
+    "name": "ChatGPT",
+    "url": "https://chat.openai.com",
+    "category": "ai",
+    "description": "Conversational AI assistant by OpenAI",
+    "tags": ["ai", "chatbot", "productivity", "writing", "coding"]
+  },
+  {
+    "id": 10,
+    "name": "Claude",
+    "url": "https://claude.ai",
+    "category": "ai",
+    "description": "AI assistant by Anthropic for detailed analysis and coding",
+    "tags": ["ai", "chatbot", "productivity", "writing", "coding"]
+  },
+  {
+    "id": 11,
+    "name": "Midjourney",
+    "url": "https://www.midjourney.com",
+    "category": "ai",
+    "description": "AI image generation through Discord",
+    "tags": ["ai", "image generation", "art", "creative", "discord"]
+  },
+  {
+    "id": 12,
+    "name": "Stable Diffusion",
+    "url": "https://stability.ai",
+    "category": "ai",
+    "description": "Open-source AI image generation model",
+    "tags": ["ai", "image generation", "open source", "art"]
+  },
+  {
+    "id": 13,
+    "name": "GitHub",
+    "url": "https://github.com",
+    "category": "dev",
+    "description": "Code hosting platform and developer collaboration",
+    "tags": ["dev", "git", "code", "collaboration", "open source"]
+  },
+  {
+    "id": 14,
+    "name": "Stack Overflow",
+    "url": "https://stackoverflow.com",
+    "category": "dev",
+    "description": "Developer Q&A community for programming help",
+    "tags": ["dev", "programming", "help", "community", "qa"]
+  },
+  {
+    "id": 15,
+    "name": "MDN Web Docs",
+    "url": "https://developer.mozilla.org",
+    "category": "dev",
+    "description": "Comprehensive web development documentation",
+    "tags": ["dev", "documentation", "web", "javascript", "css", "html"]
+  },
+  {
+    "id": 16,
+    "name": "VS Code",
+    "url": "https://code.visualstudio.com",
+    "category": "dev",
+    "description": "Free, powerful code editor by Microsoft",
+    "tags": ["dev", "ide", "editor", "coding", "free"]
+  },
+  {
+    "id": 17,
+    "name": "Figma",
+    "url": "https://www.figma.com",
+    "category": "design",
+    "description": "Collaborative interface design tool",
+    "tags": ["design", "ui", "ux", "prototyping", "collaboration"]
+  },
+  {
+    "id": 18,
+    "name": "Canva",
+    "url": "https://www.canva.com",
+    "category": "design",
+    "description": "Easy graphic design tool for non-designers",
+    "tags": ["design", "graphics", "templates", "easy", "social media"]
+  },
+  {
+    "id": 19,
+    "name": "Dribbble",
+    "url": "https://dribbble.com",
+    "category": "design",
+    "description": "Design inspiration and portfolio showcase",
+    "tags": ["design", "inspiration", "portfolio", "community"]
+  },
+  {
+    "id": 20,
+    "name": "Notion",
+    "url": "https://www.notion.so",
+    "category": "productivity",
+    "description": "All-in-one workspace for notes, docs, and projects",
+    "tags": ["productivity", "notes", "organization", "collaboration"]
+  },
+  {
+    "id": 21,
+    "name": "Obsidian",
+    "url": "https://obsidian.md",
+    "category": "productivity",
+    "description": "Local-first knowledge base with markdown",
+    "tags": ["productivity", "notes", "markdown", "knowledge base"]
+  },
+  {
+    "id": 22,
+    "name": "Trello",
+    "url": "https://trello.com",
+    "category": "productivity",
+    "description": "Visual project management with boards and cards",
+    "tags": ["productivity", "project management", "kanban", "collaboration"]
+  },
+  {
+    "id": 23,
+    "name": "Khan Academy",
+    "url": "https://www.khanacademy.org",
+    "category": "learning",
+    "description": "Free online courses in math, science, and more",
+    "tags": ["learning", "education", "free", "courses", "math", "science"]
+  },
+  {
+    "id": 24,
+    "name": "Coursera",
+    "url": "https://www.coursera.org",
+    "category": "learning",
+    "description": "University-level online courses and degrees",
+    "tags": ["learning", "education", "courses", "university", "certificates"]
+  },
+  {
+    "id": 25,
+    "name": "YouTube",
+    "url": "https://www.youtube.com",
+    "category": "learning",
+    "description": "Video platform with educational content",
+    "tags": ["learning", "video", "tutorials", "free", "entertainment"]
+  }
+]

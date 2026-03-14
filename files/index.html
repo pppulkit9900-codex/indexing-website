@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickLinks - Your Instant Index</title>
+    <meta name="description" content="Lightning-fast fuzzy search for all your favorite tools and websites">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <style>
+        /* Minimal custom CSS for animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .search-result {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .search-result:hover {
+            transform: translateX(4px);
+        }
+        
+        mark {
+            background-color: #fef08a;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        /* Hardware accelerated smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+    
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                ⚡ QuickLinks
+            </h1>
+            <div class="flex items-center gap-4">
+                <div id="user-status" class="hidden text-sm font-medium text-gray-700"></div>
+                <button id="auth-btn" onclick="toggleAuthModal()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-all">
+                    Login / Sign Up
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- Search Section -->
+        <section class="mb-12">
+            <div class="max-w-2xl mx-auto">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="search-input"
+                        placeholder="🔍 Search for anything... (anime, books, tools, etc.)"
+                        class="w-full px-6 py-4 text-lg rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none shadow-lg transition-all duration-200"
+                        autocomplete="off"
+                    >
+                    <div id="search-stats" class="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400"></div>
+                </div>
+                <button onclick="toggleAddModal()" class="mt-4 w-full py-3 border-2 border-dashed border-blue-300 text-blue-500 rounded-xl hover:bg-blue-50 transition-all">
+                    ➕ Add New Link to Database
+                </button>
+                
+                <!-- Search Results -->
+                <div id="search-results" class="mt-4 space-y-2 hidden"></div>
+            </div>
+        </section>
+
+        <!-- Categories Grid -->
+        <section id="categories-section">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Browse by Category</h2>
+            <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Categories will be rendered here -->
+            </div>
+        </section>
+
+        <!-- No Results Message -->
+        <div id="no-results" class="hidden text-center py-12">
+            <div class="text-6xl mb-4">🤷</div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">No results found</h3>
+            <p class="text-gray-500">Try searching for something else</p>
+        </div>
+
+        <!-- Auth Modal -->
+        <div id="auth-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="modal-title" class="text-2xl font-bold text-gray-800">Login</h2>
+                    <button onclick="toggleAuthModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+                
+                <div class="space-y-4">
+                    <input type="text" id="auth-user" placeholder="Username" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none">
+                    <input type="password" id="auth-pass" placeholder="Password" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none">
+                    <button onclick="handleAuth()" id="submit-btn" class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold shadow-lg hover:opacity-90 transition-all">
+                        Continue
+                    </button>
+                    <p class="text-center text-sm text-gray-500">
+                        <button onclick="toggleAuthMode()" id="switch-mode" class="text-blue-600 hover:underline">Need an account? Sign Up</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div id="add-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-md">
+            <div class="bg-white p-6 rounded-2xl w-full max-w-md">
+                <h2 class="text-xl font-bold mb-4">Add New Tool 🚀</h2>
+                <div class="space-y-3">
+                    <input type="text" id="new-cat" placeholder="Category (e.g., Music)" class="w-full p-3 border rounded-xl">
+                    <input type="text" id="new-name" placeholder="Name (e.g., Spotify)" class="w-full p-3 border rounded-xl">
+                    <input type="text" id="new-url" placeholder="URL (https://...)" class="w-full p-3 border rounded-xl">
+                    <textarea id="new-desc" placeholder="Description" class="w-full p-3 border rounded-xl"></textarea>
+                    <button onclick="saveNewLink()" class="w-full py-3 bg-green-600 text-white rounded-xl font-bold">Save to SQL</button>
+                    <button onclick="toggleAddModal()" class="w-full py-2 text-gray-500">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-20 py-8 border-t border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 text-center text-gray-600 text-sm">
+            <p>⚡ Zero JavaScript Framework • 🎯 Instant Fuzzy Search • 🚀 <span id="bundle-size">~15KB</span> Total • <span id="link-count">0</span> Links</p>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================
+        // FUZZY SEARCH ENGINE (Client-side)
+        // ============================================
+        class FuzzySearch {
+            constructor(data) {
+                this.index = this.buildIndex(data);
+            }
+
+            buildIndex(data) {
+                const index = [];
+                for (const [category, links] of Object.entries(data)) {
+                    links.forEach(link => {
+                        index.push({
+                            category,
+                            ...link,
+                            searchText: `${link.name} ${category} ${link.desc}`.toLowerCase()
+                        });
+                    });
+                }
+                return index;
+            }
+
+            // Levenshtein distance for fuzzy matching
+            levenshtein(a, b) {
+                const matrix = [];
+                for (let i = 0; i <= b.length; i++) {
+                    matrix[i] = [i];
+                }
+                for (let j = 0; j <= a.length; j++) {
+                    matrix[0][j] = j;
+                }
+                for (let i = 1; i <= b.length; i++) {
+                    for (let j = 1; j <= a.length; j++) {
+                        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                            matrix[i][j] = matrix[i - 1][j - 1];
+                        } else {
+                            matrix[i][j] = Math.min(
+                                matrix[i - 1][j - 1] + 1,
+                                matrix[i][j - 1] + 1,
+                                matrix[i - 1][j] + 1
+                            );
+                        }
+                    }
+                }
+                return matrix[b.length][a.length];
+            }
+
+            search(query) {
+                if (!query) return [];
+                
+                query = query.toLowerCase();
+                const results = [];
+
+                this.index.forEach(item => {
+                    let score = 0;
+                    const words = query.split(' ');
+
+                    // Exact match bonus
+                    if (item.searchText.includes(query)) {
+                        score += 100;
+                    }
+
+                    // Word-by-word matching
+                    words.forEach(word => {
+                        if (item.searchText.includes(word)) {
+                            score += 50;
+                        } else {
+                            // Fuzzy match with Levenshtein distance
+                            const itemWords = item.searchText.split(' ');
+                            itemWords.forEach(itemWord => {
+                                const distance = this.levenshtein(word, itemWord);
+                                if (distance <= 2) { // Allow 2 character differences
+                                    score += (20 - distance * 5);
+                                }
+                            });
+                        }
+                    });
+
+                    if (score > 0) {
+                        results.push({ ...item, score });
+                    }
+                });
+
+                return results.sort((a, b) => b.score - a.score);
+            }
+        }
+
+        // ============================================
+        // INITIALIZE (Fetch from Database)
+        // ============================================
+      // New Async initialization
+async function loadLinks() {
+    try {
+        const response = await fetch('http://192.168.31.203:3000/api/all-links');
+        const sqlData = await response.json();
+        
+        // Re-initialize the search engine with SQL data
+        window.fuzzySearch = new FuzzySearch(sqlData);
+        window.linksDatabase = sqlData; // Update global for rendering
+        
+        renderCategories();
+        document.getElementById('link-count').textContent = 
+            Object.values(sqlData).flat().length;
+    } catch (err) {
+        console.error("Failed to fetch from SQL! 💀", err);
+    }
+}
+loadLinks();
+
+
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+        function renderCategories() {
+            const grid = document.getElementById('categories-grid');
+            grid.innerHTML = '';
+
+            for (const [category, links] of Object.entries(linksDatabase)) {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-200 fade-in';
+                
+                card.innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="text-2xl">${getCategoryIcon(category)}</span>
+                        ${category}
+                    </h3>
+                    <ul class="space-y-2">
+                        ${links.map(link => `
+                            <li>
+                                <a href="${link.url}" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="block p-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                                    <div class="font-medium text-blue-600 group-hover:text-blue-800">
+                                        ${link.name} →
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        ${link.desc}
+                                    </div>
+                                </a>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                
+                grid.appendChild(card);
+            }
+        }
+
+        function renderSearchResults(results) {
+            if (results.length === 0) {
+                searchResults.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                categoriesSection.classList.add('hidden');
+                searchStats.textContent = '';
+                return;
+            }
+
+            searchResults.classList.remove('hidden');
+            noResults.classList.add('hidden');
+            categoriesSection.classList.add('hidden');
+            searchStats.textContent = `${results.length} results`;
+
+            searchResults.innerHTML = results.map(result => `
+                <a href="${result.url}" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="search-result block bg-white rounded-xl p-4 shadow-md hover:shadow-lg">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="font-semibold text-lg text-gray-800">
+                                ${result.name}
+                            </div>
+                            <div class="text-sm text-gray-500 mt-1">
+                                ${result.desc}
+                            </div>
+                            <div class="text-xs text-blue-600 mt-2">
+                                📁 ${result.category}
+                            </div>
+                        </div>
+                        <div class="text-blue-600 text-xl">→</div>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'Anime': '🎬',
+                'Books': '📚',
+                'Tools': '🛠️',
+                'Music': '🎵',
+                'Games': '🎮',
+                'Shopping': '🛒',
+                'Social': '💬',
+                'News': '📰',
+                'Education': '🎓',
+                'Finance': '💰'
+            };
+            return icons[category] || '📌';
+        }
+
+        // ============================================
+        // EVENT LISTENERS (Only 1KB!)
+        // ============================================
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const categoriesSection = document.getElementById('categories-section');
+        const noResults = document.getElementById('no-results');
+        const searchStats = document.getElementById('search-stats');
+        
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = e.target.value.trim();
+                
+                if (query === '') {
+                    searchResults.classList.add('hidden');
+                    categoriesSection.classList.remove('hidden');
+                    noResults.classList.add('hidden');
+                    searchStats.textContent = '';
+                    return;
+                }
+
+                const results = window.fuzzySearch.search(query);
+                renderSearchResults(results);
+            }, 150); // Debounce for better performance
+        });
+
+        // Note: renderCategories() is called in loadLinks() when data loads
+
+        // Smooth scroll enhancement
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // ============================================
+        // AUTHENTICATION (Login/Sign Up)
+        // ============================================
+        let isLoginMode = true;
+
+        function toggleAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('modal-title').innerText = isLoginMode ? 'Login' : 'Sign Up';
+            document.getElementById('switch-mode').innerText = isLoginMode ? 'Need an account? Sign Up' : 'Already have an account? Login';
+        }
+
+        function toggleAddModal() {
+            document.getElementById('add-modal').classList.toggle('hidden');
+        }
+
+        async function saveNewLink() {
+            const payload = {
+                category: document.getElementById('new-cat').value,
+                name: document.getElementById('new-name').value,
+                url: document.getElementById('new-url').value,
+                desc: document.getElementById('new-desc').value
+            };
+
+            const res = await fetch('http://192.168.31.203:3000/api/add-link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert("Link added to the Red File! 💰");
+                location.reload(); // Refresh to show the new link
+            }
+        }
+
+        async function handleAuth() {
+            const username = document.getElementById('auth-user').value;
+            const password = document.getElementById('auth-pass').value;
+            const endpoint = isLoginMode ? '/api/login' : '/api/signup';
+
+            const res = await fetch(`http://192.168.31.203:3000${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert(isLoginMode ? "Welcome back! 👑" : "Account Created! Now login.");
+                if (isLoginMode) location.reload(); // Refresh to set cookies
+            } else {
+                alert(data.error || "Something went wrong 💀");
+            }
+        }
+
+        // ============================================
+        // ADMIN PANEL (God Mode)
+        // ============================================
+        
+        // 🕵️ 1. Check if we're Spark69 on load
+        async function checkAdmin() {
+            const res = await fetch('http://192.168.31.203:3000/api/me');
+            const data = await res.json();
+            if (data.loggedIn && data.user.name === 'Spark69') {
+                document.getElementById('admin-gear').classList.remove('hidden');
+                renderAdminList(); // Load the management list
+            }
+        }
+
+        // 🗑️ 2. Delete Link from Phone
+        async function deleteLink(id) {
+            if (!confirm("Fr fr? Delete this? 🗑️")) return;
+            
+            await fetch('http://192.168.31.203:3000/api/delete-link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            location.reload();
+        }
+
+        // 📜 3. Render the Management List
+        function renderAdminList() {
+    const list = document.getElementById('manage-list');
+    // We flatten the categories so we can list every link individually
+    const allLinks = Object.values(window.linksDatabase).flat();
+    
+    list.innerHTML = allLinks.map(link => `
+        <div class="flex items-center justify-between bg-zinc-900 p-4 rounded-2xl border border-zinc-800 mb-2">
+            <div>
+                <div class="font-bold text-white">${link.name}</div>
+                <div class="text-xs text-zinc-500">${link.category || 'General'}</div>
+            </div>
+            <button onclick="deleteLink(${link.id})" class="text-zinc-600 hover:text-red-500 transition-colors">
+                🗑️
+            </button>
+        </div>
+    `).join('');
+}
+
+        // 🔧 4. Toggle Admin Panel
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        // 🚀 5. Submit Link to Database
+        async function submitToSQL() {
+            const category = document.getElementById('adm-cat').value;
+            const name = document.getElementById('adm-name').value;
+            const url = document.getElementById('adm-url').value;
+            const desc = document.getElementById('adm-desc').value;
+
+            const res = await fetch('http://192.168.31.203:3000/api/add-link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category, name, url, desc })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert("Added! 🎉");
+                location.reload();
+            } else {
+                alert(data.error || "Failed to add link");
+            }
+        }
+
+        // 📋 6. Populate Category Datalist on Init
+        function populateCategoryDatalist() {
+            const datalist = document.getElementById('existing-cats');
+            const categories = Object.keys(window.linksDatabase);
+            datalist.innerHTML = categories.map(cat => `<option value="${cat}">`).join('');
+        }
+
+        // Call checkAdmin on page load
+        window.addEventListener('load', () => {
+            checkAdmin();
+            populateCategoryDatalist();
+        });
+    </script>
+
+    <!-- Admin Gear Button -->
+    <button id="admin-gear" onclick="toggleAdminPanel()" class="hidden fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-tr from-blue-600 to-purple-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl z-[100] animate-bounce">
+        ⚙️
+    </button>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="hidden fixed inset-0 z-[110] bg-white overflow-y-auto fade-in">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black italic text-gray-900">GOD MODE ⚡</h2>
+                <button onclick="toggleAdminPanel()" class="text-3xl text-gray-400">✕</button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-6 rounded-3xl border-2 border-dashed border-blue-200">
+                    <h3 class="font-bold text-blue-600 mb-4 text-lg">➕ Drop a New Link</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="adm-cat" list="existing-cats" placeholder="Category (Anime, Tools, etc.)" class="w-full p-4 rounded-2xl bg-white shadow-sm outline-none focus:ring-2 ring-blue-500">
+                        <datalist id="existing-cats"></datalist>
+                        <input type="text" id="adm-name" placeholder="Website Name" class="w-full p-4 rounded-2xl bg-white shadow-sm outline-none">
+                        <input type="text" id="adm-url" placeholder="URL (https://...)" class="w-full p-4 rounded-2xl bg-white shadow-sm outline-none">
+                        <input type="text" id="adm-desc" placeholder="One-liner description" class="w-full p-4 rounded-2xl bg-white shadow-sm outline-none">
+                        <button onclick="submitToSQL()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl active:scale-95 transition-all">
+                            SEND TO DATABASE 🚀
+                        </button>
+                    </div>
+                </div>
+
+                <div id="manage-list" class="space-y-4 pt-4">
+                    <h3 class="font-bold text-gray-500 uppercase tracking-widest text-xs">Manage Current Links</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

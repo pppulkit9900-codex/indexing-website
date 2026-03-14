@@ -1,0 +1,35 @@
+{
+  "name": "link-index",
+  "version": "1.0.0",
+  "description": "High-performance link index with instant fuzzy search",
+  "scripts": {
+    "import": "node import-to-meilisearch.js",
+    "clear": "node import-to-meilisearch.js clear",
+    "stats": "node import-to-meilisearch.js stats",
+    "serve": "npx serve .",
+    "meili": "meilisearch"
+  },
+  "keywords": [
+    "search",
+    "meilisearch",
+    "links",
+    "index",
+    "fuzzy-search"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.6.2",
+    "better-sqlite3-session-store": "^0.1.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "meilisearch": "^0.37.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "main": "import-to-meilisearch.js",
+  "type": "commonjs"
+}
