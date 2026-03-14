@@ -1,130 +1,111 @@
 require('dotenv').config();
-
 const express = require('express');
-const Database = require('better-sqlite3');
+const { Pool } = require('pg');
 const session = require('express-session');
-const SqliteStore = require('better-sqlite3-session-store')(session);
+const pgSession = require('connect-pg-simple')(session);
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const path = require('path');
 
-const db = new Database('data.db');
-const app = express();
+// 🌊 Connect to Neon Postgres
+const db = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
 
+const app = express();
 app.use(cors());
 app.use(express.json());
-
-// 📂 This tells the server to show your HTML/CSS files
 app.use(express.static(__dirname));
 
-// 🍪 1. High-Security Cookie Setup
+// 🍪 Session Setup for Postgres
 app.use(session({
-    store: new SqliteStore({ client: db }),
+    store: new pgSession({ pool: db, tableName: 'session' }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        maxAge: 1000 * 60 * 60 * 24 * 7, // Cookie lasts 7 days
-        httpOnly: true, // Prevents hackers from stealing cookies via JS
-        sameSite: 'lax' 
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production' // Better for Render
     }
 }));
 
-// Create users table with password column
-db.prepare('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT UNIQUE, password TEXT, saved_stuff TEXT)').run();
-
-// 🔐 The Bouncer: Only Spark69 gets past here
-const isAdmin = (req, res, next) => {
+// 🔐 The Bouncer (Upgraded to Async)
+const isAdmin = async (req, res, next) => {
     if (req.session.userId) {
-        const user = db.prepare('SELECT name FROM users WHERE id = ?').get(req.session.userId);
+        const result = await db.query('SELECT name FROM users WHERE id = $1', [req.session.userId]);
+        const user = result.rows[0];
         if (user && user.name === process.env.ADMIN_USERNAME) {
-            return next(); // You're good, King.
+            return next();
         }
     }
     res.status(403).json({ error: "L + Ratio + Not Admin 💀" });
 };
 
-app.get('/api/links', (req, res) => {
-    res.json({ message: "Connected to Local SQL, King! 👑" });
-});
-
-// 🔗 Fetch all links from database in category structure
-app.get('/api/all-links', (req, res) => {
-    // This pulls everything from your 'links' table
-    const links = db.prepare('SELECT * FROM links').all();
-    
-    // Reformat it to match the category structure your UI expects
-    const formattedData = links.reduce((acc, link) => {
-        if (!acc[link.category]) acc[link.category] = [];
-        acc[link.category].push({ name: link.name, url: link.url, desc: link.desc });
-        return acc;
-    }, {});
-
-    res.json(formattedData);
-});
-
-// 📝 2. SIGN UP (The "New User" Entry)
-app.post('/api/signup', async (req, res) => {
-    const { username, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10); // Scramble it! 🌪️
-    
+// 🔗 Fetch all links
+app.get('/api/all-links', async (req, res) => {
     try {
-        const stmt = db.prepare('INSERT INTO users (name, password) VALUES (?, ?)');
-        stmt.run(username, hashedPassword);
-        res.json({ success: true, message: "Account created!" });
-    } catch (e) {
-        res.status(400).json({ error: "Username taken!" });
+        const result = await db.query('SELECT * FROM links');
+        const formattedData = result.rows.reduce((acc, link) => {
+            if (!acc[link.category]) acc[link.category] = [];
+            acc[link.category].push({ id: link.id, name: link.name, url: link.url, desc: link.description });
+            return acc;
+        }, {});
+        res.json(formattedData);
+    } catch (err) {
+        res.status(500).json({ error: "Database ghosted us 👻" });
     }
 });
 
-// 🔑 3. LOGIN (The "Auto-Sign-In" Logic)
+// 📝 SIGN UP
+app.post('/api/signup', async (req, res) => {
+    const { username, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        await db.query('INSERT INTO users (name, password) VALUES ($1, $2)', [username, hashedPassword]);
+        res.json({ success: true });
+    } catch (e) {
+        res.status(400).json({ error: "Username taken or DB error" });
+    }
+});
+
+// 🔑 LOGIN
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    const user = db.prepare('SELECT * FROM users WHERE name = ?').get(username);
+    const result = await db.query('SELECT * FROM users WHERE name = $1', [username]);
+    const user = result.rows[0];
 
     if (user && await bcrypt.compare(password, user.password)) {
-        req.session.userId = user.id; // Store ID in the session/cookie
+        req.session.userId = user.id;
         res.json({ success: true, user: { name: user.name } });
     } else {
         res.status(401).json({ error: "Invalid credentials" });
     }
 });
 
-// 🕵️ 4. CHECK AUTH (Is the cookie still valid?)
-app.get('/api/me', (req, res) => {
+// 🕵️ CHECK AUTH
+app.get('/api/me', async (req, res) => {
     if (req.session.userId) {
-        const user = db.prepare('SELECT name FROM users WHERE id = ?').get(req.session.userId);
-        res.json({ loggedIn: true, user });
+        const result = await db.query('SELECT name FROM users WHERE id = $1', [req.session.userId]);
+        res.json({ loggedIn: true, user: result.rows[0] });
     } else {
         res.json({ loggedIn: false });
     }
 });
 
-// �️ Apply the bouncer to 'write' routes
-app.post('/api/add-link', isAdmin, (req, res) => {
+// 🏗️ GOD MODE ROUTES
+app.post('/api/add-link', isAdmin, async (req, res) => {
     const { category, name, url, desc } = req.body;
-
-    const stmt = db.prepare('INSERT INTO links (category, name, url, desc) VALUES (?, ?, ?, ?)');
-    stmt.run(category, name, url, desc);
-    
+    await db.query('INSERT INTO links (category, name, url, description) VALUES ($1, $2, $3, $4)', [category, name, url, desc]);
     res.json({ success: true });
 });
 
-app.post('/api/delete-link', isAdmin, (req, res) => {
-    const { id } = req.body;
-    const stmt = db.prepare('DELETE FROM links WHERE id = ?');
-    stmt.run(id);
-    res.json({ success: true });
-});
-
-app.post('/api/update-link', isAdmin, (req, res) => {
-    const { id, category, name, url, desc } = req.body;
-    const stmt = db.prepare('UPDATE links SET category = ?, name = ?, url = ?, desc = ? WHERE id = ?');
-    stmt.run(category, name, url, desc, id);
+app.post('/api/delete-link', isAdmin, async (req, res) => {
+    await db.query('DELETE FROM links WHERE id = $1', [req.body.id]);
     res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server vibing on port ${PORT} 🚀`));

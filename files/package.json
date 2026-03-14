@@ -7,7 +7,9 @@
     "clear": "node import-to-meilisearch.js clear",
     "stats": "node import-to-meilisearch.js stats",
     "serve": "npx serve .",
-    "meili": "meilisearch"
+    "meili": "meilisearch",
+    "start": "node server.js",
+    "seed": "node seed.js"
   },
   "keywords": [
     "search",
@@ -20,13 +22,13 @@
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^12.6.2",
-    "better-sqlite3-session-store": "^0.1.0",
+    "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "meilisearch": "^0.37.0"
+    "meilisearch": "^0.37.0",
+    "pg": "^8.20.0"
   },
   "engines": {
     "node": ">=14.0.0"
